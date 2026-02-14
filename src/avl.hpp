@@ -28,28 +28,28 @@ class AvlTreeSet {
 
   std::unique_ptr<Node> header = std::make_unique<Node>();
   std::unique_ptr<Node>& root = header->left;
-  Node* leftmost;
+  Node* leftmost = header.get();
 
-  void setLeft(Node* node, std::unique_ptr<Node> new_left) {
-    node->left = std::move(new_left);
-    if (node->left)
-      node->left->parent = node;
-    node->updateHeight();
+  void setLeft(Node& node, std::unique_ptr<Node> new_left) {
+    node.left = std::move(new_left);
+    if (node.left)
+      node.left->parent = &node;
+    node.updateHeight();
   }
 
-  void setRight(Node* node, std::unique_ptr<Node> new_right) {
-    node->right = std::move(new_right);
-    if (node->right)
-      node->right->parent = node;
-    node->updateHeight();
+  void setRight(Node& node, std::unique_ptr<Node> new_right) {
+    node.right = std::move(new_right);
+    if (node.right)
+      node.right->parent = &node;
+    node.updateHeight();
   }
 
   void rotateL(std::unique_ptr<Node>& node) {
     assert(node && node->right);
 
     auto pivot = std::move(node->right);
-    setRight(node.get(), std::move(pivot->left));
-    setLeft(pivot.get(), std::move(node));
+    setRight(*node, std::move(pivot->left));
+    setLeft(*pivot, std::move(node));
 
     node = std::move(pivot);
   }
@@ -58,8 +58,8 @@ class AvlTreeSet {
     assert(node && node->left);
 
     auto pivot = std::move(node->left);
-    setLeft(node.get(), std::move(pivot->right));
-    setRight(pivot.get(), std::move(node));
+    setLeft(*node, std::move(pivot->right));
+    setRight(*pivot, std::move(node));
 
     node = std::move(pivot);
   }
@@ -167,6 +167,13 @@ public:
     }
   };
 
+  AvlTreeSet() {};
+  AvlTreeSet(const AvlTreeSet&) = delete;
+  AvlTreeSet& operator=(const AvlTreeSet&) = delete;
+
+  AvlTreeSet(AvlTreeSet&&) = default;
+  AvlTreeSet& operator=(AvlTreeSet&&) = default;
+
   iterator begin() { return iterator(leftmost); };
   iterator end() { return iterator(header.get()); }
 
@@ -185,7 +192,7 @@ public:
     return end();
   }
 
-  iterator upper_bound(const T& value) {
+  iterator upperBound(const T& value) {
     auto result = header;
 
     auto ptr = root;
@@ -208,6 +215,7 @@ public:
       root = std::move(new_node);
       root->parent = header.get();
       updateLeftmost();
+      return;
     }
 
     Node* prev;
@@ -217,10 +225,12 @@ public:
       cur = ((value < cur->value) ? cur->left : cur->right).get();
     }
 
-    if (value < prev->value) {
-      setLeft(prev, std::move(new_node));
+    if (value == prev->value) {
+      return;
+    } else if (value < prev->value) {
+      setLeft(*prev, std::move(new_node));
     } else {
-      setRight(prev, std::move(new_node));
+      setRight(*prev, std::move(new_node));
     }
 
     updateAncestors(prev);
@@ -245,8 +255,8 @@ public:
       }
 
       if (parent != rm) {
-        setLeft(parent, std::move(succ->right));
         setRight(succ, std::move(rm->right));
+        setLeft(parent, std::move(succ->right));
       }
 
       setLeft(succ, rm->left);

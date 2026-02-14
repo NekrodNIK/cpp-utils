@@ -7,3 +7,4 @@ project(
 gtest_dep = dependency('gtest', main : true)
 e = executable('testprog', 'tests/test_avl.cc', dependencies : gtest_dep)
 test('gtest test', e)
+
