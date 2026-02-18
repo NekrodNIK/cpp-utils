@@ -260,9 +260,9 @@ void AvlOrderedSet<T>::remove(const T& value) {
     return;
   }
 
-  auto& rm = (found.node->parent->left.get() == found.node)
-                 ? found.node->parent->left
-                 : found.node->parent->right;
+  auto node = found.node;
+  auto& rm = (node->parent->left.get() == node) ? node->parent->left
+                                                : node->parent->right;
   auto replacement = std::unique_ptr<AvlNode<T>>(nullptr);
 
   if (rm->left && rm->right) {
