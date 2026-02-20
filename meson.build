@@ -4,7 +4,12 @@ project(
   default_options : ['warning_level=3', 'cpp_std=c++20']
 )
 
+tests = [
+  'tests/test_avl.cpp',
+  'tests/test_plane.cpp'
+]
+
 gtest_dep = dependency('gtest', main : true)
-e = executable('testprog', 'tests/test_avl.cc', dependencies : gtest_dep)
+e = executable('testprog', tests, dependencies : gtest_dep)
 test('gtest test', e)
 
