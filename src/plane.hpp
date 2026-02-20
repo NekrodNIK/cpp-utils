@@ -24,10 +24,10 @@ struct Vector {
 };
 
 struct Point : Vector {
-  auto operator*(auto) = delete;
-  auto ortogonal() = delete;
-  auto isOrtogonal() = delete;
-  auto isCollinear() = delete;
+  double operator*(const Vector& v) = delete;
+  Vector ortogonal() = delete;
+  bool isOrtogonal(const Vector& v) = delete;
+  bool isCollinear(const Vector& v) = delete;
 };
 
 struct Line {
