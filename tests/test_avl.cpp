@@ -105,12 +105,12 @@ TEST(AvlOrderedSetSuite, StringsTest) {
   EXPECT_NE(set.find("PANIC"), set.end());
 }
 
-TEST(AvlOrderedSetSuite, CopyTest) {
+TEST(AvlOrderedSetSuite, CopyConstructorTest) {
   AvlOrderedSet<int> src;
   src.insert(42);
   src.insert(43);
   src.insert(44);
-  auto copy = AvlOrderedSet<int>(src);
+  AvlOrderedSet<int> copy(src);
   copy.insert(45);
 
   EXPECT_NE(src.find(42), src.end());  
@@ -124,13 +124,39 @@ TEST(AvlOrderedSetSuite, CopyTest) {
   EXPECT_NE(copy.find(45), copy.end());  
 }
 
-TEST(AvlOrderedSetSuite, MoveTest) {
+TEST(AvlOrderedSetSuite, CopyAssigmentTest) {
   AvlOrderedSet<int> src;
+  AvlOrderedSet<int> dest;
+
+  dest.insert(-1);
+  EXPECT_NE(dest.find(-1), dest.end());
+
+  src.insert(42);
+  src.insert(43);
+  src.insert(44);
+  dest = src;
+  dest.insert(45);
+
+  EXPECT_EQ(dest.find(-1), dest.end());
+  EXPECT_NE(src.find(42), src.end());  
+  EXPECT_NE(dest.find(42), dest.end());  
+  EXPECT_NE(src.find(43), src.end());  
+  EXPECT_NE(dest.find(43), dest.end());  
+  EXPECT_NE(src.find(44), src.end());  
+  EXPECT_NE(dest.find(44), dest.end());  
+  
+  EXPECT_EQ(src.find(45), src.end());  
+  EXPECT_NE(dest.find(45), dest.end());  
+}
+
+TEST(AvlOrderedSetSuite, MoveConstructorTest) {
+  AvlOrderedSet<int> src;
+  
   src.insert(42);
   src.insert(43);
   src.insert(44);
 
-  AvlOrderedSet<int> dest = std::move(src);
+  AvlOrderedSet<int> dest(std::move(src));
   EXPECT_EQ(src.find(42), src.end());  
   EXPECT_EQ(src.find(43), src.end());  
   EXPECT_EQ(src.find(44), src.end());  
@@ -140,3 +166,24 @@ TEST(AvlOrderedSetSuite, MoveTest) {
   EXPECT_NE(dest.find(44), dest.end());  
 }
 
+TEST(AvlOrderedSetSuite, MoveAssigmentTest) {
+  AvlOrderedSet<int> src;
+  AvlOrderedSet<int> dest;
+
+  dest.insert(-1);
+  EXPECT_NE(dest.find(-1), dest.end());
+  
+  src.insert(42);
+  src.insert(43);
+  src.insert(44);
+
+  dest = std::move(src);
+  EXPECT_EQ(src.find(42), src.end());  
+  EXPECT_EQ(src.find(43), src.end());  
+  EXPECT_EQ(src.find(44), src.end());  
+  
+  EXPECT_EQ(dest.find(-1), dest.end());
+  EXPECT_NE(dest.find(42), dest.end());  
+  EXPECT_NE(dest.find(43), dest.end());  
+  EXPECT_NE(dest.find(44), dest.end());  
+}
